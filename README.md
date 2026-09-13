@@ -1,10 +1,10 @@
-# Reward Shaping or Resampling? — reproduction package
+﻿# Reward Weighting or Resampling? â€” reproduction package
 
-Code and results for the paper *Reward Shaping or Resampling? Disentangling the
-Source of Rare-Class Gains in Deep Reinforcement Learning for Network Intrusion
+Code and results for the paper *Reward Weighting or Resampling? Disentangling the
+Source of Rare-Class Gains in Imbalance-Aware Network Intrusion
 Detection*.
 
-This package reproduces **only** that paper: the 2×2 reward × sampler factorial
+This package reproduces **only** that paper: the 2Ã—2 reward Ã— sampler factorial
 on NF-UNSW-NB15-v2. It is deliberately separate from the cross-dataset
 CNN-LSTM-DQN work in the parent repository, which is a different study with a
 different experimental design.
@@ -17,15 +17,15 @@ Release tag: `reward-vs-resampling-v1.0`
 
 | Paper item | Produced by | Result file |
 |---|---|---|
-| Table 5 (fixed-budget, 9 methods) | `src/nf_matrix.py` | `results/nf_unsw_full.json` |
-| Table 6 (validation-tuned) | `src/nf_tune.py` | `results/nf_unsw_tuned.json` |
+| Table 6 (fixed-budget, 9 methods) | `src/nf_matrix.py` | `results/nf_unsw_full.json` |
+| Table 5 (validation-tuned) | `src/nf_tune.py` | `results/nf_unsw_tuned.json` |
 | Table 7 (factorial contrasts, CIs) | `src/analyse.py` | derived from the above |
 | Table 8 (precision / recall / FPR) | `src/nf_tune.py` | `results/nf_unsw_tuned.json` |
 | Table 9 (per-family recall, F1) | `src/nf_tune.py` | `results/nf_unsw_tuned.json` |
-| Table 10 (100k replication) | `src/nf_tune.py` | `results/nf_unsw_small_tuned.json` |
-| Table 12 (tuned per-seed) | — | `results/nf_unsw_tuned.json` |
-| Table 13 (fixed-budget per-seed) | — | `results/nf_unsw_full.json` |
-| Figures 1–3 | `src/make_figures.py` | `figures/*.png` |
+| Table 11 (smaller-sample replication) | `src/nf_tune.py` | `results/nf_unsw_small_tuned.json` |
+| Table 12 (tuned per-seed), Table 13 (selected configs) | â€” | `results/nf_unsw_tuned.json` |
+| Table 14 (fixed-budget per-seed) | â€” | `results/nf_unsw_full.json` |
+| Figures 1â€“3 | `src/make_figures.py` | `figures/*.png` |
 
 Every table in the paper is derived from one of the three JSON files in
 `results/`. Those files contain **per-seed** values, so the paired tests can be
@@ -50,7 +50,7 @@ pip install -r requirements.txt
 
 Hardware used for the reported runs: a single NVIDIA Tesla T4 (Google Colab)
 for the neural conditions; tree ensembles are CPU-only. The factorial runs on
-CPU but takes roughly 5–8× longer.
+CPU but takes roughly 5â€“8Ã— longer.
 
 ---
 
@@ -83,20 +83,20 @@ python src/prepare_nf.py \
     --out data/processed/nf_unsw \
     --cap 400000 --floor 1000 --seed 42 --stream --chunksize 1000000
 
-# 2. Fixed-budget pass, all nine methods (Table 5, Table 13)
+# 2. Fixed-budget pass, all nine methods (Tables 6, 14)
 python src/nf_matrix.py --processed data/processed --datasets nf_unsw \
     --methods extra_trees rf xgboost ce focal \
               dqn_plain_uniform dqn_reward_uniform \
               dqn_plain_balanced dqn_reward_balanced \
     --seeds 42 7 13 99 123 --out results/nf_unsw_full.json
 
-# 3. Validation-tuned pass (Tables 6-9, Table 12)
+# 3. Validation-tuned pass (Tables 5, 7-9, 12, 13)
 python src/nf_tune.py --processed data/processed --dataset nf_unsw \
     --methods extra_trees dqn_plain_uniform dqn_reward_uniform \
               dqn_plain_balanced dqn_reward_balanced \
     --seeds 42 7 13 99 123 --out results/nf_unsw_tuned.json
 
-# 4. Independent 100k replication (Table 10)
+# 4. Smaller-sample replication, same seed, NOT independent (Table 11)
 python src/prepare_nf.py \
     --input data/NF-UNSW-NB15-v2.csv --dataset nf_unsw_small \
     --out data/processed/nf_unsw_small \
@@ -119,10 +119,10 @@ python src/make_figures.py
 
 | Label | Reward | Sampler | Method name in code |
 |---|---|---|---|
-| PU | `λ_c ≡ 1` | natural | `dqn_plain_uniform` |
-| RU | `λ_c = log(N/N_c)` | natural | `dqn_reward_uniform` |
-| PB | `λ_c ≡ 1` | class-balanced | `dqn_plain_balanced` |
-| RB | `λ_c = log(N/N_c)` | class-balanced | `dqn_reward_balanced` |
+| PU | `Î»_c â‰¡ 1` | natural | `dqn_plain_uniform` |
+| RU | `Î»_c = log(N/N_c)` | natural | `dqn_reward_uniform` |
+| PB | `Î»_c â‰¡ 1` | class-balanced | `dqn_plain_balanced` |
+| RB | `Î»_c = log(N/N_c)` | class-balanced | `dqn_reward_balanced` |
 
 RB is the configuration that corresponds to a published
 frequency-aware-reward agent; PU is the usual control. The paper's point is
@@ -136,7 +136,7 @@ that comparing only those two confounds the reward with the sampler.
 balanced sampler draws and the network initialisation. TensorFlow GPU kernels
 are not bit-deterministic by default, so neural results may differ in the third
 or fourth decimal place between machines. The reported effects (+0.142, +0.034,
-−0.005) are larger than that variation, but the small RB−PB contrast is within
+âˆ’0.005) are larger than that variation, but the small RBâˆ’PB contrast is within
 an order of magnitude of it, which is one reason the paper reports it with a
 confidence interval and per-seed values rather than a point estimate alone.
 
@@ -158,8 +158,7 @@ reproduces all nine under identical fixed-budget settings; comparisons across
 the two passes are not like-for-like and the paper does not make them.
 
 **What this package does not contain.** Results on a second corpus. The paper
-states this limitation directly: the factorial is replicated across independent
-subsamples of NF-UNSW-NB15-v2, not across datasets or class priors.
+states this limitation directly: all principal measurements are on NF-UNSW-NB15-v2; there is no cross-corpus evidence here.
 
 ---
 
@@ -170,4 +169,40 @@ standardisation work that the feature schema comes from:
 
 > Sarhan, M., Layeghy, S., Portmann, M. (2022). Towards a standard feature set
 > for network intrusion detection system datasets. *Mobile Networks and
-> Applications*, 27(1), 357–370.
+> Applications*, 27(1), 357â€“370.
+
+
+---
+
+## Corrections and caveats (current manuscript)
+
+**What the learner is.** Despite the `dqn_` prefixes, training uses one-step,
+full-information, cost-sensitive value regression. All six action rewards are
+known for a labelled flow, so the network regresses all six outputs under a
+Huber loss. There is no action selection and no exploration.
+
+**The 100,000-flow run is not an independent replication.** It uses the same
+sampling seed (42) as the 400,000-flow draw, so both come from a shared random
+stream and their overlap is neither zero nor quantified. It is a
+smaller-sample sensitivity check.
+
+**Realised sample is 399,928, not 400,000.** The 72-record shortfall (0.018%)
+arises because pass 2 accepts each class per chunk by an independent binomial
+draw at its planned rate, capped at the remaining quota and never back-filled
+(DoS 36, Malware 16, Probe 10, Other 10). Nothing is dropped for cleaning.
+
+**Balanced sampling is uniform in expectation, not exactly.** One bootstrap of
+fit-subset size is drawn with weights 1/N_y and then frozen.
+
+**Encoded width varies by seed** (139-141): the one-hot vocabulary is fit on
+each seed own fit subset.
+
+**q_c * lambda_c is a heuristic, not a derived gradient weight.** Recovering it
+from the objective needs an assumption about how residual scale varies by
+class, which the paper states rather than derives.
+
+**One corpus.** All measurements are on NF-UNSW-NB15-v2.
+
+## License
+
+MIT - see LICENSE. Citation metadata in CITATION.cff.

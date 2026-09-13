@@ -1,4 +1,4 @@
-"""
+﻿"""
 analyse.py -- regenerate every statistic reported in the paper from the
 per-seed result files.  Nothing here is hard-coded: all numbers are read from
 results/*.json, so a reader can check the published tables against a fresh run.
@@ -80,7 +80,7 @@ def factorial(recs, field, title):
 
 
 def effective_weights(meta_path):
-    """Table 2: effective per-class weight from the actual class counts."""
+    """Table 3: effective per-class weight from the actual class counts."""
     if not os.path.exists(meta_path):
         print(f"\n  [skip] {meta_path} not found; run prepare_nf.py first")
         return
@@ -91,7 +91,7 @@ def effective_weights(meta_path):
     lam = np.where(keep, np.log(np.divide(N, counts, out=np.ones_like(counts), where=keep)), 0.0)
     pi = counts / N
     K = int(keep.sum())
-    print("\n--- Table 2: effective per-class weight (relative to Normal) ---")
+    print("\n--- Table 3: effective per-class weight (relative to Normal) ---")
     print(f"  {'family':9s} {'N_c':>9s} {'pi_c':>9s} {'lambda_c':>9s}")
     for i, f in enumerate(FAM):
         print(f"  {f:9s} {int(counts[i]):9d} {pi[i]:9.6f} {lam[i]:9.4f}")
@@ -107,7 +107,7 @@ def effective_weights(meta_path):
     ru = pi * lam; ru = ru / ru.sum()
     print(f"\n  RU total-variation distance from uniform: "
           f"{0.5*np.abs(ru-u).sum():.5f}")
-    print(f"  RB upper-bound emphasis, rarest vs majority: "
+    print(f"  RB unclipped target-weight ratio, rarest vs majority: "
           f"{(lam[keep].max()/lam[0]):.1f}x  (unclipped targets)")
 
 
@@ -131,7 +131,7 @@ def main():
     tuned = load("nf_unsw_tuned.json")
     if tuned:
         factorial(tuned, "supported_macro_recall",
-                  "Tables 6-7: PRIMARY endpoint, validation-tuned, 400k")
+                  "Tables 5 and 7: PRIMARY endpoint, validation-tuned, 400k")
         factorial(tuned, "macro_f1_supported", "Secondary: macro F1")
         factorial(tuned, "detection_precision", "Secondary: detection precision")
         factorial(tuned, "detection_recall", "Secondary: detection recall")
@@ -141,16 +141,17 @@ def main():
     full = load("nf_unsw_full.json")
     if full:
         factorial(full, "supported_macro_recall",
-                  "Tables 5/13: fixed-budget pass, 400k")
+                  "Tables 6 and 14: fixed-budget pass, 400k")
 
     small = load("nf_unsw_small_tuned.json")
     if small:
         factorial(small, "supported_macro_recall",
-                  "Table 10: independent 100k replication")
-        factorial(small, "detection_precision", "Table 10: 100k precision")
+                  "Table 11: smaller-sample replication (same seed, NOT independent)")
+        factorial(small, "detection_precision", "Table 11: smaller-sample precision")
 
     print("\nAll contrasts above are computed from per-seed values in results/.")
 
 
 if __name__ == "__main__":
     main()
+
