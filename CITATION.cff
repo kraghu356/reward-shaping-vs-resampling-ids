@@ -1,0 +1,29 @@
+﻿cff-version: 1.2.0
+title: "Reward Weighting or Resampling? - reproduction package"
+message: "If you use this software or its results, please cite the accompanying paper."
+type: software
+authors:
+  - family-names: "K"
+    given-names: "Raghavendra"
+    email: "Raghavendrak_ai@mitmysore.in"
+    orcid: "https://orcid.org/0000-0003-1256-1975"
+    affiliation: "Maharaja Institute of Technology Mysore"
+  - family-names: "Ramisetty"
+    given-names: "Srividya"
+    affiliation: "CMR Institute of Technology, Bengaluru"
+  - family-names: "M"
+    given-names: "Manoj Kumar"
+    affiliation: "Jyothy Institute of Technology, Bengaluru"
+  - family-names: "Yogesh"
+    given-names: "M J"
+    affiliation: "Vellore Institute of Technology"
+version: "1.0"
+license: MIT
+repository-code: "https://github.com/kraghu356/reward-shaping-vs-resampling-ids"
+keywords:
+  - intrusion detection
+  - class imbalance
+  - reward weighting
+  - class-balanced sampling
+  - factorial ablation
+  - NetFlow
