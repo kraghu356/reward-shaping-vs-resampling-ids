@@ -107,7 +107,7 @@ def effective_weights(meta_path):
     ru = pi * lam; ru = ru / ru.sum()
     print(f"\n  RU total-variation distance from uniform: "
           f"{0.5*np.abs(ru-u).sum():.5f}")
-    print(f"  RB unclipped target-weight ratio, rarest vs majority: "
+    print(f"  RB unclipped target-emphasis PROXY ratio, rarest:majority (NOT a gradient ratio): "
           f"{(lam[keep].max()/lam[0]):.1f}x  (unclipped targets)")
 
 
@@ -123,7 +123,7 @@ def per_family(recs, title):
 
 def main():
     print("=" * 78)
-    print("Reward Shaping or Resampling? -- all reported statistics")
+    print("Reward Weighting or Resampling? -- all reported statistics")
     print("=" * 78)
 
     effective_weights("data/processed/nf_unsw_train.meta.json")
@@ -154,4 +154,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
