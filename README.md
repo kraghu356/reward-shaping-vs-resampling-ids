@@ -4,7 +4,7 @@ Code, per-seed results and metadata for the manuscript *Separating Reward Weight
 from Class-Balanced Sampling in Cost-Sensitive Value Regression for Network Intrusion
 Detection: A Factorial Study*.
 
-Release tag for the current manuscript: **`reward-vs-resampling-v2.0`**.
+Code state for the current manuscript: commit `b78e083` on `main` (to be tagged `reward-vs-resampling-v2.0`).
 The earlier single-corpus package is kept under tag `reward-vs-resampling-v1.0`
 (files `run_all.sh`, `src/nf_matrix.py`, `src/nf_tune.py`, `src/analyse.py`,
 `results/nf_unsw_*.json`); it produces the baseline specification and the
@@ -22,6 +22,7 @@ fixed-budget pass reported in the appendices.
 | `run_revision.sh` | runs all reported experiments in order (groups A–I) |
 | `colab/paper2_revision_all.py` | the resumable Colab driver that was used to run the same groups |
 | `results/revision/*.json` | per-seed results for every condition (one record per method and seed) |
+| `results/revision/leakage_audit.json` | output of `src/leakage_audit.py` (duplicate audit, factorial on unseen test flows) |
 | `results/revision/meta/*.meta.json` | subsample metadata: class counts, corpus counts, planned quotas, quota rule |
 
 ## Experiment groups
