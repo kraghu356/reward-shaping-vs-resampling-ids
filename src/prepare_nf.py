@@ -171,6 +171,9 @@ def plan_quota(counts, cap, floor):
     return quota
 
 
+PLAN = {}
+
+
 def read_and_subsample(path, cap, floor, seed, chunksize=1_000_000):
     """Memory-safe two-pass read.
 
@@ -190,6 +193,10 @@ def read_and_subsample(path, cap, floor, seed, chunksize=1_000_000):
     print(f"    {total:,} rows, classes: {named}")
 
     quota = plan_quota(counts, cap, floor)
+    PLAN.update({"corpus_counts": {CANONICAL_LABELS[c]: int(n) for c, n in sorted(counts.items())},
+                 "planned_quota": {CANONICAL_LABELS[c]: int(quota[c]) for c in sorted(quota)},
+                 "quota_rule": "quota_c = min(floor, n_c) + round((cap - sum_j min(floor, n_j)) * "
+                               "(n_c - min(floor, n_c)) / sum_j (n_j - min(floor, n_j)))"})
     rates = {c: (quota[c] / counts[c] if counts[c] else 0.0) for c in counts}
     print(f"    quota: { {CANONICAL_LABELS[c]: quota[c] for c in sorted(quota)} }")
 
@@ -200,7 +207,7 @@ def read_and_subsample(path, cap, floor, seed, chunksize=1_000_000):
     for chunk in pd.read_csv(path, low_memory=False, chunksize=chunksize):
         chunk.columns = [c.strip() for c in chunk.columns]
         fam, _ = map_labels(chunk[attack_col])
-        chunk = chunk.assign(_family=fam)
+        chunk = chunk.assign(_family=fam, _row=np.arange(seen_rows, seen_rows + len(chunk)))
         seen_rows += len(chunk)
         for c, grp in chunk.groupby("_family"):
             need = quota[c] - got[c]
@@ -259,6 +266,7 @@ def main():
             raise KeyError(f"No 'Attack' column. Found: {list(df.columns)[:12]}")
         y0, unmapped = map_labels(df[attack_col])
         df["_family"] = y0
+        df["_row"] = np.arange(len(df))
         df = stratified_subsample(df, "_family", cap, a.floor, a.seed)
 
     if unmapped:
@@ -268,7 +276,7 @@ def main():
     if not a.keep_ttl:
         drop |= set(LEAKY_COLS)
     feat_cols = [c for c in df.columns
-                 if c not in drop and c != "_family"
+                 if c not in drop and c not in ("_family", "_row")
                  and pd.api.types.is_numeric_dtype(df[c])]
     dropped_present = sorted((drop & set(df.columns)))
     print(f"  dropped ({len(dropped_present)}): {dropped_present}")
@@ -277,6 +285,7 @@ def main():
     X = df[feat_cols].replace([np.inf, -np.inf], np.nan).fillna(0.0)
     X = X.values.astype(np.float32)
     y = df["_family"].values.astype(np.int64)
+    rows = df["_row"].values.astype(np.int64)
 
     # stratified split (subsample-only above, so no duplicate can cross the split)
     rng = np.random.RandomState(a.seed)
@@ -292,6 +301,7 @@ def main():
     for split, idx in (("train", tr_idx), ("test", te_idx)):
         np.save(f"{a.out}_{split}.X.npy", X[idx])
         np.save(f"{a.out}_{split}.y.npy", y[idx])
+        np.save(f"{a.out}_{split}.rows.npy", rows[idx])   # source-row ids (overlap audit)
         counts = {CANONICAL_LABELS[i]: int(n)
                   for i, n in enumerate(np.bincount(y[idx], minlength=6))}
         meta = {"dataset": a.dataset, "split": split,
@@ -301,7 +311,7 @@ def main():
                 "label_order": CANONICAL_LABELS, "class_counts": counts,
                 "cap": a.cap, "floor": a.floor, "seed": a.seed,
                 "source_total_rows": int(total_rows), "streamed": bool(a.stream),
-                "zero_filled_features": []}   # NF-v2 shares all features: none
+                "zero_filled_features": [], **PLAN}   # NF-v2 shares all features: none
         with open(f"{a.out}_{split}.meta.json", "w") as f:
             json.dump(meta, f, indent=2)
         print(f"  [{split}] {len(idx)} rows -> {counts}")
