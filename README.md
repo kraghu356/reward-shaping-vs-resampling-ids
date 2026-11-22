@@ -4,7 +4,7 @@ Code, per-seed results and metadata for the manuscript *Separating Reward Weight
 from Class-Balanced Sampling in Cost-Sensitive Value Regression for Network Intrusion
 Detection: A Factorial Study*.
 
-Code state for the current manuscript: commit `b78e083` on `main` (to be tagged `reward-vs-resampling-v2.0`).
+Code state for the current manuscript: commit `7dd4c95` on `main` (to be tagged `reward-vs-resampling-v2.0`).
 The earlier single-corpus package is kept under tag `reward-vs-resampling-v1.0`
 (files `run_all.sh`, `src/nf_matrix.py`, `src/nf_tune.py`, `src/analyse.py`,
 `results/nf_unsw_*.json`); it produces the baseline specification and the
